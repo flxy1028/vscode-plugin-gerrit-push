@@ -34,6 +34,10 @@ npm install
 - `gerritPush.remote`：推送使用的 Git 远端名，默认 `origin`。
 - `gerritPush.enableReviewers`：开启 reviewer 选择。
 - `gerritPush.reviewerPresets`：reviewer 预设列表，显示在 reviewer 选择器中。
+- `gerritPush.confirmBeforePush`：推送前确认（默认 `true`）。
+- `gerritPush.skipAllPrompts`：跳过所有提示，立即推送（默认 `false`）。
+
+> **注意：** `skipAllPrompts` 不建议用于生产环境。当 `skipAllPrompts` 为 `true` 时，将跳过所有提示并使用默认值：远端为 `origin`，分支为当前分支。
 
 ## 打包分发
 1) 安装依赖（首次或更新时）：
@@ -48,5 +52,8 @@ npm run package
 
 ## 元信息
 - 图标与图片由 Nano Banana Pro 生成（`images/icon.png`、`images/command-icon.png`）
-- 仓库：<https://github.com/liaojianjin/vscode-gerrit-push>
+- 仓库：<https://github.com/flxy1028/vscode-plugin-gerrit-push>
 - 许可证：MIT（见 `LICENSE`）
+
+> 本项目参考 [vscode-gerrit-push](https://github.com/liaojianjin/vscode-gerrit-push) 进行开发。
+
