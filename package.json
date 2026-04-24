@@ -85,6 +85,11 @@
           "default": false,
           "description": "Show only repository name instead of full remote URL in confirmation dialog."
         },
+        "gerritPush.skipAllPrompts": {
+          "type": "boolean",
+          "default": false,
+          "description": "Skip all prompts and use defaults: remote is 'origin', branch is current branch."
+        },
         "gerritPush.reviewerPresets": {
           "type": "array",
           "items": {
@@ -92,6 +97,11 @@
           },
           "default": [],
           "description": "Preset reviewers shown in the reviewer picker."
+        },
+        "gerritPush.quickPush": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable quick push: add all files, commit messages from input box."
         }
       }
     }

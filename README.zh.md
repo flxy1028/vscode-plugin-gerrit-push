@@ -36,8 +36,10 @@ npm install
 - `gerritPush.reviewerPresets`：reviewer 预设列表，显示在 reviewer 选择器中。
 - `gerritPush.confirmBeforePush`：推送前确认（默认 `true`）。
 - `gerritPush.skipAllPrompts`：跳过所有提示，立即推送（默认 `false`）。
+- `gerritPush.quickPush`：开启快速推送：添加所有文件，使用输入框中的 commit message（默认 `false`）。
 
 > **注意：** `skipAllPrompts` 不建议用于生产环境。当 `skipAllPrompts` 为 `true` 时，将跳过所有提示并使用默认值：远端为 `origin`，分支为当前分支。
+> `quickPush` 为 `true` 时，将添加所有文件并使用输入框中的 commit message 进行推送。推送前会 执行 `git add .`、`git commit -m <msg>`、`git pull --rebase`。
 
 ## 打包分发
 1) 安装依赖（首次或更新时）：

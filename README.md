@@ -34,8 +34,10 @@ npm install
 - `gerritPush.reviewerPresets`: preset reviewer list shown in the reviewer picker.
 - `gerritPush.confirmBeforePush`: confirm before pushing.(default true)
 - `gerritPush.skipAllPrompts`: skip all prompts, pushing immediately. (default false)
+- `gerritPush.quickPush`: enable quick push: add all files, commit messages from input box. (default false)
 
 > **Note:** `skipAllPrompts` is not recommended for production use. When `skipAllPrompts` is `true`, all prompts are skipped and defaults are used: remote is `origin`, branch is the current branch.
+> `quickPush` is not recommended for production use. When `quickPush` is `true`, all files are added to the commit and the commit message is used from the input box.
 
 ## Package for distribution
 1) Install dependencies (first time or after updates):

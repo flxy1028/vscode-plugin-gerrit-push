@@ -145,7 +145,7 @@ export function deactivate() {
 async function pushToGerrit(sourceControl?: any) {
   // 首先尝试从源控制上下文获取仓库（用户从 SCM 面板点击按钮时）
   let gitRoot: string | undefined;
-  
+
   if (sourceControl?.rootUri?.fsPath) {
     // SCM 面板按钮点击时，sourceControl 包含 rootUri 信息
     gitRoot = sourceControl.rootUri.fsPath;
@@ -156,7 +156,7 @@ async function pushToGerrit(sourceControl?: any) {
     let cwd = activeEditor?.document.uri.fsPath
       ? vscode.workspace.getWorkspaceFolder(activeEditor.document.uri)?.uri.fsPath
       : vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-    
+
     if (cwd) {
       gitRoot = await resolveGitRoot(cwd);
     }
@@ -168,7 +168,7 @@ async function pushToGerrit(sourceControl?: any) {
   }
 
   const cwd = gitRoot;
-  
+
   // 获取配置：优先使用活跃编辑器所在的 folder，否则使用第一个 folder
   let configFolder = vscode.workspace.workspaceFolders?.[0];
   const activeEditor = vscode.window.activeTextEditor;
@@ -178,7 +178,7 @@ async function pushToGerrit(sourceControl?: any) {
       configFolder = editorFolder;
     }
   }
-  
+
   const config = vscode.workspace.getConfiguration('gerritPush', configFolder?.uri);
   const defaultBranch = config.get<string>('defaultBranch', '').trim();
   const remoteFromConfig = config.get<string>('remote', 'origin').trim() || 'origin';
@@ -186,6 +186,7 @@ async function pushToGerrit(sourceControl?: any) {
   const skipAllPrompts = config.get<boolean>('skipAllPrompts', false);
   const confirmationStyle = config.get<'quickpick' | 'message'>('confirmationStyle', 'quickpick');
   const compactRemoteUrl = config.get<boolean>('compactRemoteUrl', false);
+  const quickPush = config.get<boolean>('quickPush', false);
   const reviewerPresets = config.get<string[]>('reviewerPresets', [])
     .map((item) => item.trim())
     .filter((item) => item.length > 0);
@@ -193,14 +194,14 @@ async function pushToGerrit(sourceControl?: any) {
 
   // 计算目标 refs/for/<branch>
   const currentBranch = await getCurrentBranch(cwd);
-  
+
   // 先选择 remote，以便获取该 remote 的分支列表
 
-  const  remote = skipAllPrompts ? remoteFromConfig : await chooseRemote(remoteFromConfig, cwd);
+  const remote = skipAllPrompts ? remoteFromConfig : await chooseRemote(remoteFromConfig, cwd);
   if (!remote) {
     return;
   }
-  const  branch = skipAllPrompts ? currentBranch : await chooseBranch(currentBranch, defaultBranch, remote, cwd);
+  const branch = skipAllPrompts ? currentBranch : await chooseBranch(currentBranch, defaultBranch, remote, cwd);
   if (!branch) {
     return;
   }
@@ -257,13 +258,42 @@ async function pushToGerrit(sourceControl?: any) {
       cancellable: false
     },
     async () => {
-      outputChannel.appendLine(`> git push ${remote} ${pushRef}`);
-      const result = await runGit(['push', remote, pushRef], cwd, true);
-      if (result.stdout.trim()) {
-        outputChannel.appendLine(result.stdout.trim());
+      // 先执行 git add .
+      const runGitParams = []
+      if (quickPush) {
+        await runGit(['add', '.'], cwd, true);
+        outputChannel.appendLine('> git add .');
+        const gitExt = vscode.extensions.getExtension('vscode.git');
+        if (!gitExt?.exports) {
+          vscode.window.showErrorMessage('Git 扩展未就绪');
+          return;
+        }
+        const git = gitExt.exports;
+        const model = git.model;
+        const repositories = model.repositories;
+        // 获取当前仓库（第一个）
+        const repo = repositories[0];
+        if (!repo) {
+          vscode.window.showErrorMessage('未找到 Git 仓库');
+          return;
+        }
+        //  ✅ 读取用户正在输入的 commit message
+        const msg = repo.inputBox.value;
+
+        runGitParams.push(['commit', '-m', msg])
+        runGitParams.push(['pull', '--rebase'])
       }
-      if (result.stderr.trim()) {
-        outputChannel.appendLine(result.stderr.trim());
+      runGitParams.push(['push', remote, pushRef])
+
+      for await (const params of runGitParams) {
+        outputChannel.appendLine(`> ${params.join(' ')}`);
+        const result = await runGit(params, cwd, true);
+        if (result.stdout.trim()) {
+          outputChannel.appendLine(result.stdout.trim());
+        }
+        if (result.stderr.trim()) {
+          outputChannel.appendLine(result.stderr.trim());
+        }
       }
     }
   );
@@ -355,13 +385,13 @@ async function listRemoteBranches(remote: string, cwd: string): Promise<string[]
       .split(/\r?\n/)
       .map((line) => line.trim())
       .filter((line) => line.length > 0);
-    
+
     const prefix = `${remote}/`;
     const branches = lines
       .filter((line) => line.startsWith(prefix))
       .map((line) => line.substring(prefix.length))
       .filter((branch) => !branch.startsWith('HEAD')); // 过滤掉 HEAD 指针（包括 HEAD -> ... 格式）
-    
+
     return branches;
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
@@ -501,7 +531,7 @@ async function showMessageConfirmation(
   const displayUrl = remoteUrl ? (compactUrl ? extractRepoName(remoteUrl) : remoteUrl) : '';
   const reviewerText = reviewers.length > 0 ? formatReviewers(reviewers) : undefined;
   const confirmMessage = getText('pushConfirmMessage')(branch, remote, displayUrl || undefined, reviewerText);
-  
+
   const confirm = await vscode.window.showWarningMessage(
     confirmMessage,
     { modal: true },
@@ -513,13 +543,13 @@ async function showMessageConfirmation(
 function extractRepoName(url: string): string {
   // 移除 .git 后缀
   url = url.replace(/\.git\/?$/, '');
-  
+
   // 获取最后一个 / 或 : 之后的部分
   const match = url.match(/[/:]+([^/:]+)$/);
   if (match) {
     return match[1];
   }
-  
+
   return url;
 }
 
