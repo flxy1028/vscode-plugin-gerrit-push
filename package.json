@@ -3,7 +3,7 @@
   "displayName": "Gerrit Push SE",
   "description": "Adds a Source Control button to push HEAD to Gerrit refs/for/<branch> for review.",
   "icon": "images/icon.png",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "publisher": "flxy",
   "engines": {
     "vscode": "^1.84.0"
