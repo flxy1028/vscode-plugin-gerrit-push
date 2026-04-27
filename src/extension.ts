@@ -184,10 +184,10 @@ async function pushToGerrit(sourceControl?: any) {
   const defaultBranch = config.get<string>('defaultBranch', '').trim();
   const remoteFromConfig = config.get<string>('remote', 'origin').trim() || 'origin';
   const confirmBeforePush = config.get<boolean>('confirmBeforePush', true);
-  const skipAllPrompts = config.get<boolean>('skipAllPrompts', false);
+  const skipAllPrompts = config.get<boolean>('skipAllPrompts', true);
   const confirmationStyle = config.get<'quickpick' | 'message'>('confirmationStyle', 'quickpick');
   const compactRemoteUrl = config.get<boolean>('compactRemoteUrl', false);
-  const quickPush = config.get<boolean>('quickPush', false);
+  const quickPush = config.get<boolean>('quickPush', true);
   const autoAddChangeId = config.get<boolean>('autoAddChangeId', true);
   const reviewerPresets = config.get<string[]>('reviewerPresets', [])
     .map((item) => item.trim())

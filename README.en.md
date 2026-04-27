@@ -33,9 +33,9 @@ npm install
 - `gerritPush.enableReviewers`: enable reviewer selection before pushing.(default false)
 - `gerritPush.reviewerPresets`: preset reviewer list shown in the reviewer picker.
 - `gerritPush.confirmBeforePush`: confirm before pushing.(default true)
-- `gerritPush.skipAllPrompts`: skip all prompts, pushing immediately. (default false)
-- `gerritPush.quickPush`: enable quick push: add all files, commit messages from input box. (default false)
-- `gerritPush.autoAddChangeId`: enable auto add Change-Id to commit message. (default false)
+- `gerritPush.skipAllPrompts`: skip all prompts, pushing immediately. (default true)
+- `gerritPush.quickPush`: enable quick push: add all files, commit messages from input box. (default true)
+- `gerritPush.autoAddChangeId`: enable auto add Change-Id to commit message. (default true)
 
 > **Note:** `skipAllPrompts` is not recommended for production use. When `skipAllPrompts` is `true`, all prompts are skipped and defaults are used: remote is `origin`, branch is the current branch.
 > `quickPush` is not recommended for production use. When `quickPush` is `true`, all files are added to the commit and the commit message is used from the input box.
