@@ -1,56 +1,62 @@
 # Gerrit Push Button
 
-Adds a button in VS Code Source Control to push `HEAD` to `refs/for/<branch>` on your Gerrit remote for review.
+在 VS Code 源代码管理中添加一个按钮，一键将 `HEAD` 推送到 Gerrit 的 `refs/for/<branch>` 进行评审。
 
-## Features
-- Source Control title bar button and Command Palette command: **Gerrit: Push HEAD to Gerrit**
-- Runs `git push <remote> HEAD:refs/for/<branch>` with a branch picker
-- Optional reviewer prompt to push as `refs/for/<branch>%r=<reviewer>`
-- Defaults to the current branch; override with `gerritPush.defaultBranch`
-- Remote defaults to `origin`; override with `gerritPush.remote`
+> English version: see `README.en.md`.
+
+## 功能
+- Source Control 标题栏按钮 + 命令面板命令：**Gerrit: Push HEAD to Gerrit**
+- 执行 `git push <remote> HEAD:refs/for/<branch>`，提供分支选择器
+- 可选输入 reviewer，推送为 `refs/for/<branch>%r=<reviewer>`
+- 默认使用当前分支，可通过 `gerritPush.defaultBranch` 覆盖
+- 默认远端为 `origin`，可通过 `gerritPush.remote` 设定
 
 ![snipshot](images/snipshot.png)
 
-## Setup & Debug
-1) Install dependencies:
+## 安装/调试
+1) 在该目录执行：
 ```bash
 npm install
 ```
-2) Open the `vscode-gerrit-push` folder in VS Code.
-3) Open the “Run and Debug” panel, choose `Run Extension`, and hit “Run” (or press F5). This launches an Extension Development Host that builds and loads the extension.
+2) 用 VS Code 打开 `vscode-gerrit-push` 目录。
+3) 打开左侧 “Run and Debug” 面板，选择 `Run Extension` 配置并点击 “Run”（或按 F5）。这会启动 Extension Development Host，自动编译并加载插件。
 
-## Usage
-1) Open a Git workspace.
-2) In the Source Control view title bar, click the icon button **Push HEAD to Gerrit**, or run the command with the same name from the Command Palette.
-3) Pick the target branch (current branch, configured default branch, or a custom value).
-4) If enabled, select preset reviewers and/or enter reviewers (comma or space separated) for Gerrit.
-5) Confirm the prompt `git push <remote> HEAD:refs/for/<branch>`.
-6) The extension resolves the Git root via VS Code’s Git SCM (falls back to `git rev-parse`), so multi-repo workspaces push from the right repo.
+## 使用
+1) 打开一个 Git 工作区。
+2) 在 Source Control 视图标题栏点击图标按钮 **Push HEAD to Gerrit**，或在命令面板运行同名命令。
+3) 选择目标分支（当前分支、配置默认分支或自定义输入）。
+4) 开启后可选择预设 reviewer 并/或输入 reviewer（逗号或空格分隔）。
+5) 确认弹窗 `git push <remote> HEAD:refs/for/<branch>`。
+6) 插件通过 VS Code 的 Git SCM（失败时回退 `git rev-parse`）解析仓库根目录，避免多仓库场景下推错路径。
 
-## Settings
-- `gerritPush.defaultBranch`: default branch for `refs/for/<branch>` (empty = current branch).
-- `gerritPush.remote`: Git remote name to push to (default `origin`).
-- `gerritPush.enableReviewers`: enable reviewer selection before pushing.(default false)
-- `gerritPush.reviewerPresets`: preset reviewer list shown in the reviewer picker.
-- `gerritPush.confirmBeforePush`: confirm before pushing.(default true)
-- `gerritPush.skipAllPrompts`: skip all prompts, pushing immediately. (default false)
-- `gerritPush.quickPush`: enable quick push: add all files, commit messages from input box. (default false)
+## 设置
+- `gerritPush.defaultBranch`：推送到 `refs/for/<branch>` 的默认分支，留空则使用当前分支。
+- `gerritPush.remote`：推送使用的 Git 远端名，默认 `origin`。
+- `gerritPush.enableReviewers`：开启 reviewer 选择。
+- `gerritPush.reviewerPresets`：reviewer 预设列表，显示在 reviewer 选择器中。
+- `gerritPush.confirmBeforePush`：推送前确认（默认 `true`）。
+- `gerritPush.skipAllPrompts`：跳过所有提示，立即推送（默认 `false`）。
+- `gerritPush.quickPush`：开启快速推送：添加所有文件，使用输入框中的 commit message（默认 `false`）。
+- `gerritPush.autoAddChangeId`：开启自动添加 Change-Id 到 commit message（默认 `false`）。
 
-> **Note:** `skipAllPrompts` is not recommended for production use. When `skipAllPrompts` is `true`, all prompts are skipped and defaults are used: remote is `origin`, branch is the current branch.
-> `quickPush` is not recommended for production use. When `quickPush` is `true`, all files are added to the commit and the commit message is used from the input box.
+> **注意：** `skipAllPrompts` 不建议用于生产环境。当 `skipAllPrompts` 为 `true` 时，将跳过所有提示并使用默认值：远端为 `origin`，分支为当前分支。
+> `quickPush` 为 `true` 时，将添加所有文件并使用输入框中的 commit message 进行推送。推送前会 执行 `git add .`、`git commit -m <msg>`、`git pull --rebase`。
 
-## Package for distribution
-1) Install dependencies (first time or after updates):
+## 打包分发
+1) 安装依赖（首次或更新时）：
 ```bash
 npm install
 ```
-2) Build a VSIX:
+2) 打包 VSIX：
 ```bash
 npm run package
 ```
-The generated `.vsix` can be shared and installed via VS Code’s Extensions panel “Install from VSIX...”.
+生成的 `.vsix` 可分发给其他用户，在 VS Code 扩展面板右上角菜单选择 “Install from VSIX...” 安装。
 
-## Metadata
-- Icons: generated with Nano Banana Pro (`images/icon.png`, `images/command-icon.png`)
-- Repository: https://github.com/liaojianjin/vscode-gerrit-push
-- License: MIT (see `LICENSE`)
+## 元信息
+- 图标与图片由 Nano Banana Pro 生成（`images/icon.png`、`images/command-icon.png`）
+- 仓库：<https://github.com/flxy1028/vscode-plugin-gerrit-push>
+- 许可证：MIT（见 `LICENSE`）
+
+> 本项目参考 [vscode-gerrit-push](https://github.com/liaojianjin/vscode-gerrit-push) 进行开发。
+

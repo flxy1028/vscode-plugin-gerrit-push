@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { spawn } from 'child_process';
+import { generateCommitSha } from './genChangeId';
 
 type GitRunResult = {
   stdout: string;
@@ -187,6 +188,7 @@ async function pushToGerrit(sourceControl?: any) {
   const confirmationStyle = config.get<'quickpick' | 'message'>('confirmationStyle', 'quickpick');
   const compactRemoteUrl = config.get<boolean>('compactRemoteUrl', false);
   const quickPush = config.get<boolean>('quickPush', false);
+  const autoAddChangeId = config.get<boolean>('autoAddChangeId', true);
   const reviewerPresets = config.get<string[]>('reviewerPresets', [])
     .map((item) => item.trim())
     .filter((item) => item.length > 0);
@@ -260,19 +262,15 @@ async function pushToGerrit(sourceControl?: any) {
     async () => {
       // 先执行 git add .
       const runGitParams = []
+      // 生成 Change-Id 添加到 commit message
+      // ==============================================
+      if (autoAddChangeId) {
+        await addChangeIdToCommitMessage(cwd);
+      }
       if (quickPush) {
         await runGit(['add', '.'], cwd, true);
         outputChannel.appendLine('> git add .');
-        const gitExt = vscode.extensions.getExtension('vscode.git');
-        if (!gitExt?.exports) {
-          vscode.window.showErrorMessage('Git 扩展未就绪');
-          return;
-        }
-        const git = gitExt.exports;
-        const model = git.model;
-        const repositories = model.repositories;
-        // 获取当前仓库（第一个）
-        const repo = repositories[0];
+        const repo = getCurrentGitRepoInstance();
         if (!repo) {
           vscode.window.showErrorMessage('未找到 Git 仓库');
           return;
@@ -300,7 +298,34 @@ async function pushToGerrit(sourceControl?: any) {
 
   vscode.window.showInformationMessage(`Pushed HEAD to ${remote} refs/for/${branch}`);
 }
-
+function getCurrentGitRepoInstance() {
+  const gitExt = vscode.extensions.getExtension('vscode.git');
+  if (!gitExt?.exports) {
+    vscode.window.showErrorMessage('Git 扩展未就绪');
+    return;
+  }
+  const git = gitExt.exports;
+  const model = git.model;
+  const repositories = model.repositories;
+  // 获取当前仓库（第一个）
+  const repo = repositories[0];
+  if (!repo) {
+    vscode.window.showErrorMessage('未找到 Git 仓库');
+    return;
+  }
+  //  ✅ 读取用户正在输入的 commit message
+  return repo;
+}
+async function addChangeIdToCommitMessage(cwd: string) {
+  const repo = getCurrentGitRepoInstance();
+  const changeId = await generateCommitSha(cwd, repo.inputBox.value);
+  let msg = repo.inputBox.value;
+  if (!msg.includes('Change-Id:')) {
+    msg += `\n\nChange-Id: I${changeId}`;
+    repo.inputBox.value = msg;
+  }
+  return msg;
+}
 async function resolveGitRoot(cwd: string): Promise<string | undefined> {
   // 尝试定位 git 仓库根目录，避免工作区包含多个 git 仓库时用错路径
   try {
