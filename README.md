@@ -34,7 +34,7 @@ npm install
 - `gerritPush.remote`：推送使用的 Git 远端名，默认 `origin`。
 - `gerritPush.enableReviewers`：开启 reviewer 选择。
 - `gerritPush.reviewerPresets`：reviewer 预设列表，显示在 reviewer 选择器中。
-- `gerritPush.confirmBeforePush`：推送前确认（默认 `true`）。
+- `gerritPush.confirmBeforePush`：推送前确认（默认 `false`）。
 - `gerritPush.skipAllPrompts`：跳过所有提示，立即推送（默认 `true`）。
 - `gerritPush.quickPush`：开启快速推送：添加所有文件，使用输入框中的 commit message（默认 `true`）。
 - `gerritPush.autoAddChangeId`：开启自动添加 Change-Id 到 commit message（默认 `true`）。

@@ -32,7 +32,7 @@ npm install
 - `gerritPush.remote`: Git remote name to push to (default `origin`).
 - `gerritPush.enableReviewers`: enable reviewer selection before pushing.(default false)
 - `gerritPush.reviewerPresets`: preset reviewer list shown in the reviewer picker.
-- `gerritPush.confirmBeforePush`: confirm before pushing.(default true)
+- `gerritPush.confirmBeforePush`: confirm before pushing.(default false)
 - `gerritPush.skipAllPrompts`: skip all prompts, pushing immediately. (default true)
 - `gerritPush.quickPush`: enable quick push: add all files, commit messages from input box. (default true)
 - `gerritPush.autoAddChangeId`: enable auto add Change-Id to commit message. (default true)
