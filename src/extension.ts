@@ -295,7 +295,7 @@ async function pushToGerrit(sourceControl?: any) {
       }
     }
   );
-
+  clearCommitMessage();
   vscode.window.showInformationMessage(`Pushed HEAD to ${remote} refs/for/${branch}`);
 }
 function getCurrentGitRepoInstance() {
@@ -315,6 +315,10 @@ function getCurrentGitRepoInstance() {
   }
   //  ✅ 读取用户正在输入的 commit message
   return repo;
+}
+function clearCommitMessage() {
+  const repo = getCurrentGitRepoInstance();
+  repo.inputBox.value = '';
 }
 async function addChangeIdToCommitMessage(cwd: string) {
   const repo = getCurrentGitRepoInstance();
