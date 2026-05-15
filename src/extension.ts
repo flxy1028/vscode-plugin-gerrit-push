@@ -139,24 +139,27 @@ async function executePush(
     title: `Pushing ${pushRef} to ${remote}`,
     cancellable: false
   }, async () => {
+    const repo = getCurrentGitRepoInstance();
+    if (!repo) {
+      vscode.window.showErrorMessage('未找到 Git 仓库');
+      return;
+    }
+    let commitMessage = repo.inputBox.value;
+
+    if (!commitMessage) {
+      vscode.window.showErrorMessage('请输入提交信息');
+      return;
+    }
+    if (!commitMessage.includes('Change-Id:') && config.autoAddChangeId)  {
+      const changeId = await generateCommitSha(cwd, commitMessage);
+      commitMessage = `${commitMessage}\n\nChange-Id: I${changeId}`;
+    };
+
     const gitCommands: string[][] = [];
 
-    if (config.autoAddChangeId) {
-      await addChangeIdToCommitMessage(cwd);
-    }
-
     if (config.quickPush) {
-      await runGit(['add', '.'], cwd, true, text => outputChannel.append(text));
-      outputChannel.appendLine('> git add .');
-      
-      const repo = getCurrentGitRepoInstance();
-      if (!repo) {
-        vscode.window.showErrorMessage('未找到 Git 仓库');
-        return;
-      }
-      
-      const msg = repo.inputBox.value;
-      gitCommands.push(['commit', '-m', msg]);
+      gitCommands.push(['add', '.']);
+      gitCommands.push(['commit', '-m', commitMessage]);
       gitCommands.push(['pull', '--rebase']);
     }
 
@@ -174,13 +177,3 @@ async function executePush(
   vscode.window.showInformationMessage(`Pushed HEAD to ${remote} refs/for/${branch}`);
 }
 
-async function addChangeIdToCommitMessage(cwd: string): Promise<void> {
-  const repo = getCurrentGitRepoInstance();
-  if (!repo) return;
-
-  const commitMessage = repo.inputBox.value;
-  if (commitMessage.includes('Change-Id:')) return;
-
-  const changeId = await generateCommitSha(cwd, commitMessage);
-  repo.inputBox.value = `${commitMessage}\n\nChange-Id: I${changeId}`;
-}
